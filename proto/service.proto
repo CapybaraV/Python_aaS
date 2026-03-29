@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package scriptservice;
+
+message ScriptRequest {
+    string url = 1;
+    string params = 2;
+}
+
+message ScriptResponse {
+    int32 exit_code = 1;
+    string exec_id = 2;
+    string result = 3;
+    string stderr = 4;
+}
+
+service ScriptService{
+    rpc ExecuteScript(ScriptRequest) returns (ScriptResponse);
+}
