@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import service_pb2 as service__pb2
+from proto import service_pb2 as proto_dot_service__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__
@@ -18,7 +18,7 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in service_pb2_grpc.py depends on'
+        + ' but the generated code in proto/service_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -36,23 +36,23 @@ class ScriptServiceStub(object):
         """
         self.ExecuteScriptSync = channel.unary_unary(
                 '/scriptservice.ScriptService/ExecuteScriptSync',
-                request_serializer=service__pb2.ScriptRequest.SerializeToString,
-                response_deserializer=service__pb2.ScriptResponseSync.FromString,
+                request_serializer=proto_dot_service__pb2.ScriptRequest.SerializeToString,
+                response_deserializer=proto_dot_service__pb2.ScriptResponseSync.FromString,
                 _registered_method=True)
         self.ExecuteScriptAsync = channel.unary_unary(
                 '/scriptservice.ScriptService/ExecuteScriptAsync',
-                request_serializer=service__pb2.ScriptRequest.SerializeToString,
-                response_deserializer=service__pb2.ScriptResponseAsync.FromString,
+                request_serializer=proto_dot_service__pb2.ScriptRequest.SerializeToString,
+                response_deserializer=proto_dot_service__pb2.ScriptResponseAsync.FromString,
                 _registered_method=True)
         self.GetStatus = channel.unary_unary(
                 '/scriptservice.ScriptService/GetStatus',
-                request_serializer=service__pb2.StatusRequest.SerializeToString,
-                response_deserializer=service__pb2.StatusResponse.FromString,
+                request_serializer=proto_dot_service__pb2.StatusRequest.SerializeToString,
+                response_deserializer=proto_dot_service__pb2.StatusResponse.FromString,
                 _registered_method=True)
         self.GetResult = channel.unary_unary(
                 '/scriptservice.ScriptService/GetResult',
-                request_serializer=service__pb2.ResultRequest.SerializeToString,
-                response_deserializer=service__pb2.ScriptResponseSync.FromString,
+                request_serializer=proto_dot_service__pb2.ResultRequest.SerializeToString,
+                response_deserializer=proto_dot_service__pb2.ScriptResponseSync.FromString,
                 _registered_method=True)
 
 
@@ -88,23 +88,23 @@ def add_ScriptServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'ExecuteScriptSync': grpc.unary_unary_rpc_method_handler(
                     servicer.ExecuteScriptSync,
-                    request_deserializer=service__pb2.ScriptRequest.FromString,
-                    response_serializer=service__pb2.ScriptResponseSync.SerializeToString,
+                    request_deserializer=proto_dot_service__pb2.ScriptRequest.FromString,
+                    response_serializer=proto_dot_service__pb2.ScriptResponseSync.SerializeToString,
             ),
             'ExecuteScriptAsync': grpc.unary_unary_rpc_method_handler(
                     servicer.ExecuteScriptAsync,
-                    request_deserializer=service__pb2.ScriptRequest.FromString,
-                    response_serializer=service__pb2.ScriptResponseAsync.SerializeToString,
+                    request_deserializer=proto_dot_service__pb2.ScriptRequest.FromString,
+                    response_serializer=proto_dot_service__pb2.ScriptResponseAsync.SerializeToString,
             ),
             'GetStatus': grpc.unary_unary_rpc_method_handler(
                     servicer.GetStatus,
-                    request_deserializer=service__pb2.StatusRequest.FromString,
-                    response_serializer=service__pb2.StatusResponse.SerializeToString,
+                    request_deserializer=proto_dot_service__pb2.StatusRequest.FromString,
+                    response_serializer=proto_dot_service__pb2.StatusResponse.SerializeToString,
             ),
             'GetResult': grpc.unary_unary_rpc_method_handler(
                     servicer.GetResult,
-                    request_deserializer=service__pb2.ResultRequest.FromString,
-                    response_serializer=service__pb2.ScriptResponseSync.SerializeToString,
+                    request_deserializer=proto_dot_service__pb2.ResultRequest.FromString,
+                    response_serializer=proto_dot_service__pb2.ScriptResponseSync.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -132,8 +132,8 @@ class ScriptService(object):
             request,
             target,
             '/scriptservice.ScriptService/ExecuteScriptSync',
-            service__pb2.ScriptRequest.SerializeToString,
-            service__pb2.ScriptResponseSync.FromString,
+            proto_dot_service__pb2.ScriptRequest.SerializeToString,
+            proto_dot_service__pb2.ScriptResponseSync.FromString,
             options,
             channel_credentials,
             insecure,
@@ -159,8 +159,8 @@ class ScriptService(object):
             request,
             target,
             '/scriptservice.ScriptService/ExecuteScriptAsync',
-            service__pb2.ScriptRequest.SerializeToString,
-            service__pb2.ScriptResponseAsync.FromString,
+            proto_dot_service__pb2.ScriptRequest.SerializeToString,
+            proto_dot_service__pb2.ScriptResponseAsync.FromString,
             options,
             channel_credentials,
             insecure,
@@ -186,8 +186,8 @@ class ScriptService(object):
             request,
             target,
             '/scriptservice.ScriptService/GetStatus',
-            service__pb2.StatusRequest.SerializeToString,
-            service__pb2.StatusResponse.FromString,
+            proto_dot_service__pb2.StatusRequest.SerializeToString,
+            proto_dot_service__pb2.StatusResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -213,8 +213,8 @@ class ScriptService(object):
             request,
             target,
             '/scriptservice.ScriptService/GetResult',
-            service__pb2.ResultRequest.SerializeToString,
-            service__pb2.ScriptResponseSync.FromString,
+            proto_dot_service__pb2.ResultRequest.SerializeToString,
+            proto_dot_service__pb2.ScriptResponseSync.FromString,
             options,
             channel_credentials,
             insecure,

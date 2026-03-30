@@ -17,7 +17,7 @@ class ScriptServiceServicer(service_pb2_grpc.ScriptServiceServicer):
 
         return service_pb2.ScriptResponseSync(
             exit_code = result["exit_code"],
-            exec_id = result["exec_id"],
+            exec_id = result["execution_id"],
             result = result["output"],
             stderr = result["stderr"]
         )
@@ -30,22 +30,35 @@ class ScriptServiceServicer(service_pb2_grpc.ScriptServiceServicer):
         return service_pb2.ScriptResponseAsync(
             exec_id = exec_id
         )
-    # def GetStatus(self, request, context):
-    #     result = self.executor.get_status(
-    #         request.exec_id
-    #     )
-    #     return service_pb2.StatusResponse(
-    #         exec_id = result["exec_id"],
-    #         status = result["status"],
-    #         message = result["result"]
-    #     )
-    # def GetResult(self, request, context):
-    #     result = self.executor.get_result(
-    #         request.exec_id
-    #     )
-    #     return service_pb2.ScriptResponseSync(
-    #         exec_id = result["exec_id"]
-    #     )
+    def GetStatus(self, request, context):
+        result = self.executor.get_status(
+            request.exec_id
+        )
+        status = {
+            "pending": service_pb2.PENDING,
+            "running": service_pb2.RUNNING,
+            "completed": service_pb2.COMPLETED,
+            "failed": service_pb2.FAILED,
+            "not_found": service_pb2.UNKNOWN
+        }
+        status_res = status.get(
+            result.get("status", 'unknown'),
+            service_pb2.UNKNOWN
+        )
+        return service_pb2.StatusResponse(
+            exec_id = request.exec_id,
+            status = status_res,
+        )
+    def GetResult(self, request, context):
+        result = self.executor.get_result(
+            request.exec_id
+        )
+        return service_pb2.ScriptResponseSync(
+            exit_code = result["exit_code"],
+            exec_id = result["execution_id"],
+            result = result["output"],
+            stderr = result["stderr"]
+        )
 
 
 

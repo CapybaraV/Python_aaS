@@ -1,0 +1,12 @@
+certifi==2026.2.25
+charset-normalizer==3.4.6
+docker==7.1.0
+futures==3.0.5
+grpcio==1.78.0
+grpcio-tools==1.78.0
+idna==3.11
+protobuf==6.33.6
+requests==2.33.0
+setuptools==82.0.1
+typing_extensions==4.15.0
+urllib3==2.6.3

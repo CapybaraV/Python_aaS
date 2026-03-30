@@ -25,7 +25,6 @@ message StatusRequest {
 message StatusResponse {
     string exec_id = 1;
     Status status = 2;
-    string message = 3;
 }
 
 message ResultRequest {

@@ -17,18 +17,53 @@ class Client:
         params = input("Введите параметры в формате JSON:\n")
         try:
             params = json.loads(params)
-            return {str(k): str(v) for k,v in params.items()}
+            return params
         except Exception as e:
             print(e)
     def run_sync(self):
         request = service_pb2.ScriptRequest(
             url = self.input_url(),
-            params = self.input_params()
+            params = json.dumps(self.input_params())
         )
         try:
-            response = self.stub.ExecuteScript(request)
+            response = self.stub.ExecuteScriptSync(request)
             print(response)
-            return response
+        except grpc.RpcError as e:
+            print(f"{e.code()} - {e.details()}")
+        except Exception as e:
+            print(f"{e}")
+    def run_async(self):
+        request = service_pb2.ScriptRequest(
+            url = self.input_url(),
+            params = json.dumps(self.input_params())
+        )
+        try:
+            response = self.stub.ExecuteScriptAsync(request)
+            print(response)
+        except grpc.RpcError as e:
+            print(f"{e.code()} - {e.details()}")
+        except Exception as e:
+            print(f"{e}")
+    def return_status(self):
+        exec_id = input("Введите exec_id для получения результата:\n").strip()
+        request = service_pb2.StatusRequest(
+            exec_id = exec_id
+        )
+        try:
+            status = self.stub.GetStatus(request)
+            print(status)
+        except grpc.RpcError as e:
+            print(f"{e.code()} - {e.details()}")
+        except Exception as e:
+            print(f"{e}")
+    def get_res(self):
+        exec_id = input("Введите exec_id для получения результата:\n").strip()
+        request = service_pb2.StatusRequest(
+            exec_id = exec_id
+        )
+        try:
+            response = self.stub.GetResult(request)
+            print(response)
         except grpc.RpcError as e:
             print(f"{e.code()} - {e.details()}")
         except Exception as e:
@@ -63,12 +98,12 @@ class Client:
 # def call_execute_script():
 #     channel = grpc.insecure_channel('localhost:50051')
 #     stub = service_pb2_grpc.ScriptServiceStub(channel)
-#     params = {
-#             "start_x": 1,
-#             "start_y": 1,
-#             "end_x": 2,
-#             "end_y": 2
-#         }
+    # params = {
+    #         "start_x": 1,
+    #         "start_y": 1,
+    #         "end_x": 2,
+    #         "end_y": 2
+    #     }
 #     request = service_pb2.ScriptRequest(
 #         url="http://0.0.0.0:8000/script.py",
 #         params = json.dumps(params)

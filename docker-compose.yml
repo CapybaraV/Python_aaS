@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  script-repo:
+    build:
+      context: ./repository
+      dockerfile: Dockerfile
+    container_name: script-repo
+    ports:
+      - "8000:8000"
+    networks:
+      - python-aas-network
+    restart: unless-stopped
+
+  grpc-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: grpc-server
+    ports:
+      - "50051:50051"
+    depends_on:
+      - script-repo
+    networks:
+      - python-aas-network
+    environment:
+      - SCRIPT_REPO_URL=http://script-repo:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  grpc-client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: grpc-client
+    depends_on:
+      - grpc-server
+      - script-repo
+    networks:
+      - python-aas-network
+    environment:
+      - GRPC_SERVER_ADDRESS=grpc-server:50051
+    stdin_open: true
+    tty: true
+    profiles:
+      - client
+
+networks:
+  python-aas-network:
+    driver: bridge

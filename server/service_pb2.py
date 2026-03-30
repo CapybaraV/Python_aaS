@@ -24,17 +24,27 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rservice.proto\x12\rscriptservice\",\n\rScriptRequest\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x0e\n\x06params\x18\x02 \x01(\t\"T\n\x0eScriptResponse\x12\x11\n\texit_code\x18\x01 \x01(\x05\x12\x0f\n\x07\x65xec_id\x18\x02 \x01(\t\x12\x0e\n\x06result\x18\x03 \x01(\t\x12\x0e\n\x06stderr\x18\x04 \x01(\t2]\n\rScriptService\x12L\n\rExecuteScript\x12\x1c.scriptservice.ScriptRequest\x1a\x1d.scriptservice.ScriptResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rservice.proto\x12\rscriptservice\",\n\rScriptRequest\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x0e\n\x06params\x18\x02 \x01(\t\"X\n\x12ScriptResponseSync\x12\x11\n\texit_code\x18\x01 \x01(\x05\x12\x0f\n\x07\x65xec_id\x18\x02 \x01(\t\x12\x0e\n\x06result\x18\x03 \x01(\t\x12\x0e\n\x06stderr\x18\x04 \x01(\t\"&\n\x13ScriptResponseAsync\x12\x0f\n\x07\x65xec_id\x18\x01 \x01(\t\" \n\rStatusRequest\x12\x0f\n\x07\x65xec_id\x18\x01 \x01(\t\"H\n\x0eStatusResponse\x12\x0f\n\x07\x65xec_id\x18\x01 \x01(\t\x12%\n\x06status\x18\x02 \x01(\x0e\x32\x15.scriptservice.Status\" \n\rResultRequest\x12\x0f\n\x07\x65xec_id\x18\x01 \x01(\t*J\n\x06Status\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07PENDING\x10\x01\x12\x0b\n\x07RUNNING\x10\x02\x12\r\n\tCOMPLETED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x32\xd5\x02\n\rScriptService\x12T\n\x11\x45xecuteScriptSync\x12\x1c.scriptservice.ScriptRequest\x1a!.scriptservice.ScriptResponseSync\x12V\n\x12\x45xecuteScriptAsync\x12\x1c.scriptservice.ScriptRequest\x1a\".scriptservice.ScriptResponseAsync\x12H\n\tGetStatus\x12\x1c.scriptservice.StatusRequest\x1a\x1d.scriptservice.StatusResponse\x12L\n\tGetResult\x12\x1c.scriptservice.ResultRequest\x1a!.scriptservice.ScriptResponseSyncb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'service_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
+  _globals['_STATUS']._serialized_start=350
+  _globals['_STATUS']._serialized_end=424
   _globals['_SCRIPTREQUEST']._serialized_start=32
   _globals['_SCRIPTREQUEST']._serialized_end=76
-  _globals['_SCRIPTRESPONSE']._serialized_start=78
-  _globals['_SCRIPTRESPONSE']._serialized_end=162
-  _globals['_SCRIPTSERVICE']._serialized_start=164
-  _globals['_SCRIPTSERVICE']._serialized_end=257
+  _globals['_SCRIPTRESPONSESYNC']._serialized_start=78
+  _globals['_SCRIPTRESPONSESYNC']._serialized_end=166
+  _globals['_SCRIPTRESPONSEASYNC']._serialized_start=168
+  _globals['_SCRIPTRESPONSEASYNC']._serialized_end=206
+  _globals['_STATUSREQUEST']._serialized_start=208
+  _globals['_STATUSREQUEST']._serialized_end=240
+  _globals['_STATUSRESPONSE']._serialized_start=242
+  _globals['_STATUSRESPONSE']._serialized_end=314
+  _globals['_RESULTREQUEST']._serialized_start=316
+  _globals['_RESULTREQUEST']._serialized_end=348
+  _globals['_SCRIPTSERVICE']._serialized_start=427
+  _globals['_SCRIPTSERVICE']._serialized_end=768
 # @@protoc_insertion_point(module_scope)

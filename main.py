@@ -54,3 +54,5 @@ if __name__ == "__main__":
     exit_code, output = run_script("script.py", params)
     print(f"exit code: {exit_code}")
     print(f"output:\n{output}")
+
+    {"start_x": 1, "start_y": 1, "end_x": 2, "end_y": 2}

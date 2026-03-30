@@ -1,22 +1,29 @@
 FROM python:3.13-slim
 
+# Docker CLI
+RUN apt-get update && apt-get install -y \
+    docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-COPY ../requirements.txt .
+COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ../proto/service.proto /app/proto/
+COPY service_pb2.py .
+COPY service_pb2_grpc.py .
 
 COPY server.py .
 COPY executor.py .
-COPY script_executor.py .
+
+COPY proto/ ./proto/
 
 RUN python -m grpc_tools.protoc \
-    -I/proto \
+    -I. \
     --python_out=/app \
     --grpc_python_out=/app \
-    /proto/service.proto
+    ./proto/service.proto
 
 EXPOSE 50051
 
