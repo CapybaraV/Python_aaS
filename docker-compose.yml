@@ -30,23 +30,6 @@ services:
       - /tmp/python-aas-scripts:/tmp/scripts
     restart: unless-stopped
 
-  grpc-client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    container_name: grpc-client
-    depends_on:
-      - grpc-server
-      - script-repo
-    networks:
-      - python-aas-network
-    environment:
-      - GRPC_SERVER_ADDRESS=grpc-server:50051
-    stdin_open: true
-    tty: true
-    profiles:
-      - client
-
 
 networks:
   python-aas-network:

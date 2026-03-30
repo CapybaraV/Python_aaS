@@ -93,30 +93,6 @@ class Client:
                     print("Неверный ввод\n")
 
 
-
-
-# def call_execute_script():
-#     channel = grpc.insecure_channel('localhost:50051')
-#     stub = service_pb2_grpc.ScriptServiceStub(channel)
-    # params = {
-    #         "start_x": 1,
-    #         "start_y": 1,
-    #         "end_x": 2,
-    #         "end_y": 2
-    #     }
-#     request = service_pb2.ScriptRequest(
-#         url="http://0.0.0.0:8000/script.py",
-#         params = json.dumps(params)
-#     )
-#     try:
-#         response = stub.ExecuteScript(request)
-#         print(response)
-#         return response
-#     except grpc.RpcError as e:
-#         print(f"{e.code()} - {e.details()}")
-#     except Exception as e:
-#         print(f"{e}")
-
 def start_client():
     client = Client()
     client.run()
