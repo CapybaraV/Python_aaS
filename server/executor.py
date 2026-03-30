@@ -50,11 +50,11 @@ class ScriptExec:
         )
 
         try:
-            result = container.wait(timeout=5)
+            result = container.wait(timeout=8)
 
             stdout = container.logs(stdout=True, stderr=False).decode()
             stderr = container.logs(stdout=False, stderr=True).decode()
-
+            print(stdout)
             return {
                 "exit_code": result.get("StatusCode", -1),
                 "output": stdout,
@@ -155,6 +155,7 @@ class ScriptExec:
                 }
 
         except Exception as e:
+            print(str(e))
             with self.lock:
                 self.executions[exec_id] = {
                     "status": "failed",
@@ -185,8 +186,11 @@ class ScriptExec:
 
             exec_info = self.executions[exec_id]
 
-            if exec_info["status"] != "completed":
-                return {"error": f"status={exec_info['status']}"}
-
-            return exec_info["result"]
+            result = exec_info["result"]
+            return {
+                "exit_code": result.get("exit_code", -1),
+                "execution_id": result.get("execution_id", exec_id),
+                "output": result.get("output", ""),
+                "stderr": result.get("stderr", "")
+            }
         
