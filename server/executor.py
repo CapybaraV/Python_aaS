@@ -6,9 +6,8 @@ import uuid
 import json
 import docker
 import time
+import logging
 from typing import Dict, Any
-
-
 class ScriptExec:
     def __init__(self):
         self.executions = {}
@@ -16,21 +15,23 @@ class ScriptExec:
         self.client = docker.from_env()
 
     def download_script(self, url: str) -> str:
+        print(f"Downloading script from: {url}", flush=True)
         response = requests.get(url)
         response.raise_for_status()
-
-        fd, path = tempfile.mkstemp(suffix=".py")
-        with os.fdopen(fd, "wb") as f:
+        script_name = f"{uuid.uuid4().hex}.py"
+        path = os.path.join("/tmp/scripts", script_name)
+        
+        with open(path, "wb") as f:
             f.write(response.content)
-
         os.chmod(path, 0o755)
+        print(path)
         return path
 
     def run_in_container(self, file_path: str, params: Dict[str, str]) -> Dict[str, Any]:
         full_path = os.path.abspath(file_path)
         dir_path = os.path.dirname(full_path)
         name = os.path.basename(full_path)
-
+        print(name, dir_path, full_path)
         container = self.client.containers.run(
             image="python:3.13-slim",
             command=["python", f"/scripts/{name}", json.dumps(params)],
@@ -41,7 +42,7 @@ class ScriptExec:
             read_only=True,
             pids_limit=64,
             volumes={
-                dir_path: {
+                "/tmp/python-aas-scripts/": {
                     "bind": "/scripts",
                     "mode": "ro"
                 }
@@ -70,6 +71,7 @@ class ScriptExec:
     def execute_sync(self, url: str, params: Dict[str, str]) -> Dict[str, Any]:
         exec_id = str(uuid.uuid4())
         file_path = None
+        print(url)
 
         try:
             file_path = self.download_script(url)

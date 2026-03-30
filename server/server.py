@@ -2,14 +2,18 @@ import grpc
 import service_pb2
 import service_pb2_grpc
 import json
+import logging
 from executor import ScriptExec
 from concurrent import futures
+
+
 
 class ScriptServiceServicer(service_pb2_grpc.ScriptServiceServicer):
     def __init__(self):
         self.executor = ScriptExec()
         
     def ExecuteScriptSync(self, request, context):
+        # print(request.url)
         result = self.executor.execute_sync(
             request.url,
             json.loads(request.params)

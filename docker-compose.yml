@@ -27,6 +27,7 @@ services:
       - SCRIPT_REPO_URL=http://script-repo:8000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/python-aas-scripts:/tmp/scripts
     restart: unless-stopped
 
   grpc-client:
@@ -45,6 +46,7 @@ services:
     tty: true
     profiles:
       - client
+
 
 networks:
   python-aas-network:
