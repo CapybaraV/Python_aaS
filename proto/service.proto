@@ -7,13 +7,42 @@ message ScriptRequest {
     string params = 2;
 }
 
-message ScriptResponse {
+message ScriptResponseSync {
     int32 exit_code = 1;
     string exec_id = 2;
     string result = 3;
     string stderr = 4;
 }
 
+message ScriptResponseAsync {
+    string exec_id = 1;
+}
+
+message StatusRequest {
+    string exec_id = 1;
+}
+
+message StatusResponse {
+    string exec_id = 1;
+    Status status = 2;
+    string message = 3;
+}
+
+message ResultRequest {
+    string exec_id = 1;
+}
+
+enum Status {
+  UNKNOWN = 0;
+  PENDING = 1;
+  RUNNING = 2;
+  COMPLETED = 3;
+  FAILED = 4;
+}
+
 service ScriptService{
-    rpc ExecuteScript(ScriptRequest) returns (ScriptResponse);
+    rpc ExecuteScriptSync(ScriptRequest) returns (ScriptResponseSync);
+    rpc ExecuteScriptAsync(ScriptRequest) returns (ScriptResponseAsync);
+    rpc GetStatus(StatusRequest) returns (StatusResponse);
+    rpc GetResult(ResultRequest) returns (ScriptResponseSync);
 }

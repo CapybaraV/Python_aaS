@@ -5,77 +5,186 @@ import os
 import uuid
 import json
 import docker
+import time
 from typing import Dict, Any
+
 
 class ScriptExec:
     def __init__(self):
-        self.execs = {}
+        self.executions = {}
         self.lock = threading.Lock()
-    def download_script(self, url:str) -> str:
+        self.client = docker.from_env()
+
+    def download_script(self, url: str) -> str:
         response = requests.get(url)
-        fd, path = tempfile.mkstemp(suffix='.py')
-        with os.fdopen(fd, 'wb') as f:
+        response.raise_for_status()
+
+        fd, path = tempfile.mkstemp(suffix=".py")
+        with os.fdopen(fd, "wb") as f:
             f.write(response.content)
+
         os.chmod(path, 0o755)
         return path
-    def execute_sync(self, url:str, params:Dict[str, str]) ->Dict[str, Any]:
-        exec_id = str(uuid.uuid4())
-        full_path = None
-        try:
-            file = self.download_script(url)
-            params_json = json.dumps(params)
-            client = docker.from_env()
-            full_path = os.path.abspath(file)
-            dir = os.path.dirname(full_path)
-            name = os.path.basename(full_path)
-            if not os.path.exists(full_path):
-                error_result = {
-                    'exit_code': -1,
-                    'output': '',
-                    'stderr': f"'{file}' not found at {full_path}",
-                    'execution_id': exec_id
-                }
-                return error_result
-            
-            container = client.containers.run(
-                image="python:3.13-slim",
-                command=["python", f"/scripts/{name}", params_json],
-                detach=True,
-                remove=False,
-                mem_limit="128m",
-                volumes={
-                    dir: {
-                        "bind": "/scripts",
-                        "mode": "ro"
-                    }
-                }
-            )
 
+    def run_in_container(self, file_path: str, params: Dict[str, str]) -> Dict[str, Any]:
+        full_path = os.path.abspath(file_path)
+        dir_path = os.path.dirname(full_path)
+        name = os.path.basename(full_path)
+
+        container = self.client.containers.run(
+            image="python:3.13-slim",
+            command=["python", f"/scripts/{name}", json.dumps(params)],
+            detach=True,
+            mem_limit="128m",
+            nano_cpus=500_000_000,
+            network_disabled=True,
+            read_only=True,
+            pids_limit=64,
+            volumes={
+                dir_path: {
+                    "bind": "/scripts",
+                    "mode": "ro"
+                }
+            }
+        )
+
+        try:
             result = container.wait(timeout=5)
-            logs = container.logs(stdout=True, stderr=True)
-            container.remove()
-            os.remove(file)
-            response_result = {
-                "exit_code": result.get("StatusCode", "StatusCode not found"),
-                "output": logs.decode(),
-                "stderr": result.get('Error', ''),
-                "exec_id": exec_id
+
+            stdout = container.logs(stdout=True, stderr=False).decode()
+            stderr = container.logs(stdout=False, stderr=True).decode()
+
+            return {
+                "exit_code": result.get("StatusCode", -1),
+                "output": stdout,
+                "stderr": stderr
             }
-            return response_result
+
         except Exception as e:
-            error_result = {
-                'exit_code': -1,
-                'output': '',
-                'stderr': str(e),
-                'execution_id': exec_id
+            container.kill()
+            raise e
+
+        finally:
+            container.remove(force=True)
+
+    def execute_sync(self, url: str, params: Dict[str, str]) -> Dict[str, Any]:
+        exec_id = str(uuid.uuid4())
+        file_path = None
+
+        try:
+            file_path = self.download_script(url)
+            result = self.run_in_container(file_path, params)
+
+            response = {
+                **result,
+                "execution_id": exec_id
             }
-            return error_result
+
+            with self.lock:
+                self.executions[exec_id] = {
+                    "status": "completed",
+                    "result": response,
+                    "timestamp": time.time()
+                }
+
+            return response
+
+        except Exception as e:
+            error = {
+                "exit_code": -1,
+                "output": "",
+                "stderr": str(e),
+                "execution_id": exec_id
+            }
+
+            with self.lock:
+                self.executions[exec_id] = {
+                    "status": "failed",
+                    "result": error,
+                    "timestamp": time.time()
+                }
+
+            return error
+
+        finally:
+            if file_path and os.path.exists(file_path):
+                os.remove(file_path)
+
+    def submit_async(self, url: str, params: Dict[str, str]) -> str:
+        exec_id = str(uuid.uuid4())
+
+        with self.lock:
+            self.executions[exec_id] = {
+                "status": "pending",
+                "result": None,
+                "timestamp": time.time()
+            }
+
+        thread = threading.Thread(
+            target=self.execute_async,
+            args=(exec_id, url, params),
+            daemon=True
+        )
+        thread.start()
+
+        return exec_id
+
+    def execute_async(self, exec_id: str, url: str, params: Dict[str, str]):
+        file_path = None
+
+        try:
+            with self.lock:
+                self.executions[exec_id]["status"] = "running"
+
+            file_path = self.download_script(url)
+
+            result = self.run_in_container(file_path, params)
+
+            response = {
+                **result,
+                "execution_id": exec_id
+            }
+
+            with self.lock:
+                self.executions[exec_id] = {
+                    "status": "completed",
+                    "result": response,
+                    "timestamp": time.time()
+                }
+
+        except Exception as e:
+            with self.lock:
+                self.executions[exec_id] = {
+                    "status": "failed",
+                    "result": {
+                        "exit_code": -1,
+                        "output": "",
+                        "stderr": str(e),
+                        "execution_id": exec_id
+                    },
+                    "timestamp": time.time()
+                }
+
+        finally:
+            if file_path and os.path.exists(file_path):
+                os.remove(file_path)
+
+    def get_status(self, exec_id: str) -> Dict[str, str]:
+        with self.lock:
+            if exec_id not in self.executions:
+                return {"status": "not_found"}
+
+            return {"status": self.executions[exec_id]["status"]}
+
+    def get_result(self, exec_id: str) -> Dict[str, Any]:
+        with self.lock:
+            if exec_id not in self.executions:
+                return {"error": "not_found"}
+
+            exec_info = self.executions[exec_id]
+
+            if exec_info["status"] != "completed":
+                return {"error": f"status={exec_info['status']}"}
+
+            return exec_info["result"]
         
-# test = ScriptExec()
-# params = {
-#         "start_x": 1,
-#         "start_y": 1,
-#         "end_x": 3,
-#         "end_y": 2
-#     }
-# print(test.execute_sync("../script.py", params))
